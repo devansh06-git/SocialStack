@@ -84,23 +84,37 @@ Maven
 
 1\. Clone the repository:
 
-&#x20;  ```bash
+
 
 &#x20;  git clone \[https://github.com/devansh06-git/SocialStack.git](https://github.com/devansh06-git/SocialStack.git)
 
-<img src="./ScreenShort/Student%20Dashboard.png" width="600" alt="Student Dashboard">
+\## 📸 Project Screenshots
 
-!\[Student Dashboard](./ScreenShort/Student Dashboard.png)
 
-<img src="./ScreenShort/Faculty%20Dashboard.png" width="600" alt="Faculty Dashboard">
 
-!\[Faculty Dashboard](./ScreenShort/Faculty Dashboard.png)
+<p align="center">
 
-<img src="./ScreenShort/Create%20Event.png" width="600" alt="Create Event">
+&#x20; <img src="./ScreenShort/Student%20Dashboard.png" width="600" alt="Student Dashboard">
 
-!\[Create Event](./ScreenShort/Create Event.png)
+&#x20; <br><i>Student Dashboard</i><br><br>
 
-<img src="./ScreenShort/Browse%20Event.png" width="600" alt="Browse Event">
+&#x20; 
 
-!\[Student Dashboard](./ScreenShort/Browse Events.png)
+&#x20; <img src="./ScreenShort/Faculty%20Dashboard.png" width="600" alt="Faculty Dashboard">
+
+&#x20; <br><i>Faculty Dashboard</i><br><br>
+
+&#x20; 
+
+&#x20; <img src="./ScreenShort/Create%20Event.png" width="600" alt="Create Event">
+
+&#x20; <br><i>Create Event Interface</i><br><br>
+
+&#x20; 
+
+&#x20; <img src="./ScreenShort/Browse%20Events.png" width="600" alt="Browse Events">
+
+&#x20; <br><i>Browse Events List</i>
+
+</p>
 
