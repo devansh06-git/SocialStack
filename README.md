@@ -14,15 +14,15 @@ SocialStack is a full-stack platform designed to bridge the gap between campus e
 
 &#x20; Tech Stack
 
-\* \*\*Backend:\*\* Java 17+, Spring Boot
+Backend:\*\* Java 17+, Spring Boot
 
-\* \*\*Security:\*\* Spring Security \& JWT (JSON Web Tokens)
+Security:\*\* Spring Security \& JWT (JSON Web Tokens)
 
-\* \*\*Database:\*\* MySQL
+Database:\*\* MySQL
 
-\* \*\*Real-time Features:\*\* Firebase Integration
+Real-time Features:\*\* Firebase Integration
 
-\* \*\*Build Tool:\*\* Maven
+Build Tool:\*\* Maven
 
 
 
@@ -52,13 +52,13 @@ Analytics Dashboard:\*\* Visual insights into event attendance and engagement.
 
 The project follows a \*\*Layered Architecture\*\* to ensure scalability and clean code:
 
-1\.  \*\*Controller Layer:\*\* Handles REST API endpoints.
+1\.  Controller Layer:\*\* Handles REST API endpoints.
 
-2\.  \*\*Service Layer:\*\* Contains the core business logic.
+2\.  Service Layer:\*\* Contains the core business logic.
 
-3\.  \*\*Repository Layer:\*\* Manages data persistence with Spring Data JPA.
+3\. Repository Layer:\*\* Manages data persistence with Spring Data JPA.
 
-4\.  \*\*Entity Layer:\*\* Defines the MySQL database schema.
+4\.  Entity Layer:\*\* Defines the MySQL database schema.
 
 
 
@@ -72,11 +72,11 @@ The project follows a \*\*Layered Architecture\*\* to ensure scalability and cle
 
 &#x20;Prerequisites
 
-\* JDK 17 or higher
+ JDK 17 or higher
 
-\* MySQL Server
+MySQL Server
 
-\* Maven
+ Maven
 
 
 
