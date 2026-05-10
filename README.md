@@ -88,3 +88,13 @@ MySQL Server
 
 &#x20;  git clone \[https://github.com/devansh06-git/SocialStack.git](https://github.com/devansh06-git/SocialStack.git)
 
+
+
+!\[Student Dashboard]("ScreenShort\\Student Dashboard.png")
+
+!\[Faculty Dashboard]("ScreenShort\\Faculty Dashboard.png")
+
+!\[Create Event]("ScreenShort\\Create Event.png")
+
+!\[Student Dashboard]("ScreenShort\\Browse Events.png")
+
