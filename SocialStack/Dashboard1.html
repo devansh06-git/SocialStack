@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SocialStack | Student Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-dark: #0f172a;
+      --sidebar-bg: #1e293b;
+      --accent: #6366f1;
+      --accent2: #8b5cf6;
+      --text-primary: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --danger: #ef4444;
+      --yellow: #f59e0b;
+      --cyan: #06b6d4;
+    }
+
+    body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* NAVBAR */
+    nav {
+      background: var(--bg-dark); padding: 0 28px; height: 58px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0; z-index: 200; position: sticky; top: 0;
+    }
+    .logo { color: #fff; font-size: 17px; font-weight: 700; }
+    .logo span { color: #6366f1; }
+    .nav-links { display: flex; align-items: center; gap: 4px; }
+    .nav-links a {
+      color: #94a3b8; text-decoration: none; font-size: 13.5px;
+      padding: 6px 14px; border-radius: 6px; transition: all .2s; cursor: pointer;
+    }
+    .nav-links a:hover { background: #334155; color: #fff; }
+    .nav-links a.active { background: var(--accent); color: #fff; }
+    .logout-btn {
+      background: var(--danger); color: #fff; border: none;
+      padding: 6px 14px; border-radius: 6px; font-size: 13px;
+      cursor: pointer; margin-left: 8px; transition: background .2s;
+    }
+    .logout-btn:hover { background: #dc2626; }
+
+    /* HAMBURGER */
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
+    .hamburger span { width: 22px; height: 2px; background: #94a3b8; border-radius: 2px; display: block; }
+
+    /* LAYOUT */
+    .layout { display: flex; flex: 1; overflow: hidden; min-height: calc(100vh - 58px); }
+
+    /* SIDEBAR */
+    aside {
+      width: 220px; background: var(--sidebar-bg); flex-shrink: 0;
+      padding: 24px 14px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto;
+      transition: transform 0.3s;
+    }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 199; }
+    .sidebar-overlay.active { display: block; }
+    .sidebar-label {
+      color: #475569; font-size: 11px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; padding: 0 10px; margin-bottom: 8px;
+    }
+    .sidebar-link {
+      display: flex; align-items: center; gap: 10px; color: #94a3b8;
+      font-size: 14px; padding: 9px 12px; border-radius: 8px; cursor: pointer;
+      transition: all .2s; border: none; background: none; width: 100%; text-align: left;
+    }
+    .sidebar-link:hover { background: #334155; color: #fff; }
+    .sidebar-link.active { background: var(--accent); color: #fff; }
+    .sidebar-link .icon { font-size: 16px; width: 22px; text-align: center; }
+
+    /* MAIN */
+    main { flex: 1; overflow-y: auto; padding: 28px; display: flex; flex-direction: column; gap: 22px; }
+
+    /* VIEWS */
+    .view { display: none; flex-direction: column; gap: 22px; animation: fadeIn .25s ease; }
+    .view.active { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* PROFILE CARD */
+    .profile-card {
+      background: linear-gradient(135deg, #1e293b 0%, #273549 100%);
+      border-radius: 16px; padding: 28px 32px;
+      display: flex; align-items: center; gap: 24px; color: #fff;
+      position: relative; overflow: hidden; flex-wrap: wrap;
+    }
+    .profile-card::before {
+      content: ''; position: absolute; top: -40px; right: -40px;
+      width: 180px; height: 180px; border-radius: 50%; background: rgba(99,102,241,.15);
+    }
+    .avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--cyan));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .profile-info h2 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .profile-info p { color: #94a3b8; font-size: 13px; margin-bottom: 10px; }
+    .profile-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+    .badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge-purple { background: var(--accent); color: #fff; }
+    .badge-cyan   { background: var(--cyan); color: #fff; }
+    .badge-green  { background: var(--success); color: #fff; }
+    .profile-stats { margin-left: auto; display: flex; gap: 24px; }
+    .stat { text-align: center; }
+    .stat .num { font-size: 28px; font-weight: 700; color: #fff; }
+    .stat .lbl  { font-size: 11px; color: #94a3b8; }
+
+    /* STATS ROW */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .stat-card {
+      background: #fff; border-radius: 12px; padding: 20px;
+      border-left: 4px solid transparent; box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .stat-card.purple { border-color: var(--accent); }
+    .stat-card.yellow { border-color: var(--yellow); }
+    .stat-card.green  { border-color: var(--success); }
+    .stat-card.cyan   { border-color: var(--cyan); }
+    .stat-card .s-label { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; }
+    .stat-card .s-value { font-size: 28px; font-weight: 700; color: var(--text-primary); }
+
+    /* TWO COL */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .card { background: #fff; border-radius: 12px; padding: 22px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+    .card h3 { font-size: 15px; color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .empty-state { text-align: center; padding: 32px; color: var(--text-muted); font-size: 14px; }
+    .empty-state .e-icon { font-size: 36px; margin-bottom: 10px; }
+
+    /* CATEGORY BARS */
+    .category-row { margin-bottom: 12px; }
+    .category-row .cat-label { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 4px; }
+    .bar-bg { background: #f1f5f9; border-radius: 4px; height: 6px; }
+    .bar-fill { height: 6px; border-radius: 4px; background: var(--accent); width: 0%; transition: width 0.6s ease; }
+
+    /* PAGE HEADER */
+    .page-header { margin-bottom: 4px; }
+    .page-header h2 { font-size: 20px; font-weight: 700; color: var(--text-primary); }
+    .page-header p  { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── EVENT SELECTION / REGISTRATION ── */
+    .events-browser { background: #fff; border-radius: 14px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+    .events-browser h3 { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+    .events-browser p.sub { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+
+    /* Filters */
+    .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
+    .filter-input {
+      padding: 8px 14px; border: 1.5px solid var(--border); border-radius: 8px;
+      font-size: 13px; font-family: inherit; color: var(--text-primary); outline: none; flex: 1; min-width: 160px;
+    }
+    .filter-input:focus { border-color: var(--accent); }
+    .filter-select {
+      padding: 8px 14px; border: 1.5px solid var(--border); border-radius: 8px;
+      font-size: 13px; font-family: inherit; background: #fff; outline: none; cursor: pointer;
+    }
+    .filter-select:focus { border-color: var(--accent); }
+
+    /* Event Cards Grid */
+    .event-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .event-card {
+      background: #f8fafc; border-radius: 12px; padding: 18px; border: 1.5px solid var(--border);
+      transition: all 0.2s; position: relative;
+    }
+    .event-card:hover { border-color: var(--accent); box-shadow: 0 4px 16px rgba(99,102,241,.12); transform: translateY(-2px); }
+    .event-card .ec-cat {
+      display: inline-block; padding: 2px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600; background: #ede9fe; color: #5b21b6; margin-bottom: 10px;
+    }
+    .event-card h4 { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+    .event-card .ec-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
+    .event-card .ec-desc { font-size: 12px; color: var(--text-muted); margin: 10px 0; line-height: 1.5; }
+    .event-card .ec-spots { font-size: 12px; color: var(--success); font-weight: 600; margin-bottom: 12px; }
+    .ec-spots.full { color: var(--danger); }
+    .btn-register {
+      width: 100%; padding: 9px; background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: opacity 0.2s; font-family: inherit;
+    }
+    .btn-register:hover { opacity: 0.88; }
+    .btn-register:disabled { background: #e2e8f0; color: var(--text-muted); cursor: not-allowed; }
+    .btn-registered { background: #d1fae5; color: #065f46; border: none; width: 100%; padding: 9px; border-radius: 8px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: default; }
+    .loading-cards { text-align: center; padding: 40px; color: var(--text-muted); }
+
+    /* SUBMIT FORM */
+    .form-wrap {
+      background: #fff; border-radius: 14px; padding: 32px; max-width: 680px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .form-wrap h2 { text-align: center; color: var(--text-primary); margin-bottom: 24px; font-size: 20px; }
+    .form-msg { text-align: center; margin-bottom: 14px; font-size: 14px; padding: 10px; border-radius: 8px; display: none; }
+    .form-msg.success { background: #d1fae5; color: #065f46; display: block; }
+    .form-msg.error   { background: #fee2e2; color: #991b1b; display: block; }
+    .f-label { display: block; margin-top: 14px; margin-bottom: 5px; font-weight: 600; font-size: 13px; color: #475569; }
+    .f-input, .f-select, .f-textarea {
+      width: 100%; padding: 10px 12px; border: 1.5px solid var(--border);
+      border-radius: 8px; font-size: 14px; font-family: inherit; color: var(--text-primary); transition: border-color .2s;
+    }
+    .f-input:focus, .f-select:focus, .f-textarea:focus { outline: none; border-color: var(--accent); }
+    .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .f-btn {
+      margin-top: 22px; padding: 13px; width: 100%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; border: none; border-radius: 8px; font-size: 15px;
+      cursor: pointer; font-weight: 600; transition: opacity .2s;
+    }
+    .f-btn:hover { opacity: .9; }
+
+    /* ACHIEVEMENTS */
+    .ach-header { background: linear-gradient(135deg, #4a90e2, #9013fe); border-radius: 14px; color: #fff; text-align: center; padding: 32px 20px; }
+    .ach-header h1 { font-size: 26px; font-weight: 700; }
+    .ach-header p  { font-size: 14px; margin-top: 6px; opacity: .85; }
+    .ach-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+    .ach-card { background: #fff; border-radius: 14px; box-shadow: 0 4px 14px rgba(0,0,0,.08); overflow: hidden; transition: transform .3s; }
+    .ach-card:hover { transform: translateY(-6px); }
+    .ach-img { width: 100%; height: 140px; background: linear-gradient(135deg, #e0e7ff, #c7d2fe); display: flex; align-items: center; justify-content: center; font-size: 48px; }
+    .ach-body { padding: 16px; }
+    .ach-body h3 { font-size: 14px; color: #4a90e2; margin-bottom: 6px; font-weight: 700; }
+    .ach-body p  { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+    /* MY EVENTS TABLE */
+    .events-table { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+    .events-table table { width: 100%; border-collapse: collapse; }
+    .events-table th { background: #f8fafc; padding: 12px 16px; text-align: left; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; }
+    .events-table td { padding: 13px 16px; font-size: 14px; color: var(--text-primary); border-top: 1px solid var(--border); }
+
+    /* NOTIFICATIONS */
+    .notif-list { display: flex; flex-direction: column; gap: 12px; }
+    .notif-item { background: #fff; border-radius: 10px; padding: 16px 18px; display: flex; align-items: flex-start; gap: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.05); border-left: 4px solid var(--accent); }
+    .notif-item.unread { border-left-color: var(--success); }
+    .notif-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+    .notif-text h4 { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
+    .notif-text p  { font-size: 13px; color: var(--text-muted); }
+    .notif-time { margin-left: auto; font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+
+    /* ANALYTICS */
+    .analytics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .analytics-card { background: #fff; border-radius: 12px; padding: 22px; box-shadow: 0 1px 4px rgba(0,0,0,.06); text-align: center; }
+    .analytics-card .a-icon { font-size: 32px; margin-bottom: 8px; }
+    .analytics-card .a-val  { font-size: 30px; font-weight: 700; color: var(--text-primary); }
+    .analytics-card .a-lbl  { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+    /* TOAST */
+    #toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px; z-index: 9999; opacity: 0; transition: opacity 0.3s; pointer-events: none; max-width: 300px; }
+    #toast.show    { opacity: 1; }
+    #toast.success { background: #16a34a; }
+    #toast.error   { background: #dc2626; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .two-col { grid-template-columns: 1fr; }
+      .analytics-grid { grid-template-columns: repeat(2, 1fr); }
+      .f-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .hamburger { display: flex; }
+      aside { position: fixed; left: 0; top: 58px; height: calc(100vh - 58px); z-index: 200; transform: translateX(-100%); }
+      aside.open { transform: translateX(0); }
+      main { padding: 16px; gap: 14px; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .nav-links { display: none; }
+      .profile-card { flex-direction: column; align-items: flex-start; gap: 14px; }
+      .profile-stats { margin-left: 0; }
+      .layout { overflow: auto; }
+    }
+    @media (max-width: 480px) {
+      .stats-row { grid-template-columns: 1fr; }
+      .analytics-grid { grid-template-columns: 1fr; }
+      .event-cards-grid { grid-template-columns: 1fr; }
+      .filters { flex-direction: column; }
+      .filter-input { min-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <span class="logo">🎓 <span>Social</span>Stack</span>
+  <div class="nav-links">
+    <a class="nav-tab active" data-view="profile" onclick="showView('profile')">Home</a>
+    <a class="nav-tab" data-view="browse" onclick="showView('browse')">Browse Events</a>
+    <a class="nav-tab" data-view="submit" onclick="showView('submit')">Submit Event</a>
+    <a class="nav-tab" data-view="analytics" onclick="showView('analytics')">Analytics</a>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+  <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar">
+    <div class="sidebar-label">Student Panel</div>
+    <button class="sidebar-link active" data-view="profile" onclick="showView('profile');closeSidebar()">
+      <span class="icon">🏠</span> Home
+    </button>
+    <button class="sidebar-link" data-view="profile" onclick="showView('profile');closeSidebar()">
+      <span class="icon">👤</span> My Profile
+    </button>
+    <button class="sidebar-link" data-view="browse" onclick="showView('browse');closeSidebar()">
+      <span class="icon">🔍</span> Browse Events
+    </button>
+    <button class="sidebar-link" data-view="events" onclick="showView('events');closeSidebar()">
+      <span class="icon">📅</span> My Events
+    </button>
+    <button class="sidebar-link" data-view="achievements" onclick="showView('achievements');closeSidebar()">
+      <span class="icon">🏆</span> Achievements
+    </button>
+    <button class="sidebar-link" data-view="notifications" onclick="showView('notifications');closeSidebar()">
+      <span class="icon">🔔</span> Notifications
+    </button>
+    <button class="sidebar-link" data-view="submit" onclick="showView('submit');closeSidebar()">
+      <span class="icon">➕</span> Submit Event
+    </button>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main>
+
+    <!-- ══ PROFILE / HOME ══ -->
+    <div class="view active" id="view-profile">
+      <div class="profile-card">
+        <div class="avatar" id="studentAvatar">ST</div>
+        <div class="profile-info">
+          <h2 id="studentName">Student</h2>
+          <p id="studentMeta">Department &nbsp;·&nbsp; email</p>
+          <div class="profile-badges">
+            <span class="badge badge-purple">Student</span>
+            <span class="badge badge-cyan" id="studentDeptBadge">—</span>
+            <span class="badge badge-green">✅ On Roll</span>
+          </div>
+        </div>
+        <div class="profile-stats">
+          <div class="stat"><div class="num" id="statJoined">0</div><div class="lbl">Events Joined</div></div>
+          <div class="stat"><div class="num" id="statPending">0</div><div class="lbl">Pending</div></div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card purple">
+          <div class="s-label">Events Participated</div><div class="s-value" id="sParticipated">0</div>
+        </div>
+        <div class="stat-card yellow">
+          <div class="s-label">Pending</div><div class="s-value" id="sPending">0</div>
+        </div>
+        <div class="stat-card green">
+          <div class="s-label">Attended</div><div class="s-value" id="sAttended">0</div>
+        </div>
+        <div class="stat-card cyan">
+          <div class="s-label">Attendance %</div><div class="s-value" id="sAttRate">0%</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <h3>📅 My Registered Events</h3>
+          <div id="myRegisteredEvents">
+            <div class="empty-state">
+              <div class="e-icon">📭</div>
+              <p>You haven't joined any events yet.<br>
+                <span style="color:#6366f1; cursor:pointer; font-weight:600;" onclick="showView('browse')">Browse events →</span>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>📊 Participation by category</h3>
+          <p style="font-size:12px;color:#64748b;margin:-6px 0 14px 0;line-height:1.4;">Categories from your registrations, <strong>most participation first</strong>. Bar length = share of your joined events.</p>
+          <div id="categoryBars"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ BROWSE & REGISTER EVENTS ══ -->
+    <div class="view" id="view-browse">
+      <div class="page-header">
+        <h2>Browse & Register for Events</h2>
+        <p>Discover upcoming events and register with one click</p>
+      </div>
+
+      <div class="events-browser">
+        <h3>🔍 Available Events</h3>
+        <p class="sub">Filter by category or search by name to find events that interest you.</p>
+
+        <div class="filters">
+          <input class="filter-input" type="text" id="searchInput" placeholder="🔍  Search events..." oninput="filterEvents()">
+          <select class="filter-select" id="catFilter" onchange="filterEvents()">
+            <option value="">All Categories</option>
+            <option value="technical">Technical</option>
+            <option value="cultural">Cultural</option>
+            <option value="sports">Sports</option>
+            <option value="workshop">Workshop</option>
+            <option value="seminar">Seminar</option>
+            <option value="conference">Conference</option>
+            <option value="meetup">Meetup</option>
+            <option value="other">Other</option>
+          </select>
+          <span class="filter-select" style="display:inline-flex;align-items:center;color:#64748b;font-size:12px;padding:8px 12px;">Approved events only</span>
+        </div>
+
+        <div class="event-cards-grid" id="eventCardsGrid">
+          <div class="loading-cards">⏳ Loading events from server...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SUBMIT EVENT ══ -->
+    <div class="view" id="view-submit">
+      <div class="page-header">
+        <h2>Submit Event</h2>
+        <p>Fill in the details to submit a new event for approval</p>
+      </div>
+      <div class="form-wrap">
+        <h2>📋 Submit Your Event</h2>
+        <div id="formMsg" class="form-msg"></div>
+        <form id="eventForm">
+          <label class="f-label">Event Name</label>
+          <input class="f-input" type="text" id="eventName" placeholder="Enter event name" required>
+
+          <div class="f-row">
+            <div>
+              <label class="f-label">Event Date</label>
+              <input class="f-input" type="date" id="eventDate" required>
+            </div>
+            <div>
+              <label class="f-label">Event Time</label>
+              <input class="f-input" type="time" id="eventTime" required>
+            </div>
+          </div>
+
+          <label class="f-label">Location</label>
+          <input class="f-input" type="text" id="location" placeholder="Venue / Room / Online" required>
+
+          <label class="f-label">Category</label>
+          <select class="f-select" id="category" required>
+            <option value="">-- Select Category --</option>
+            <option value="technical">Technical</option>
+            <option value="cultural">Cultural</option>
+            <option value="sports">Sports</option>
+            <option value="workshop">Workshop</option>
+            <option value="seminar">Seminar</option>
+            <option value="conference">Conference</option>
+            <option value="meetup">Meetup</option>
+            <option value="other">Other</option>
+          </select>
+
+          <label class="f-label">Event Description</label>
+          <textarea class="f-textarea" id="description" rows="4" placeholder="Describe your event..." required></textarea>
+
+          <div class="f-row">
+            <div>
+              <label class="f-label">Organizer Name</label>
+              <input class="f-input" type="text" id="organizer" placeholder="Your name" required>
+            </div>
+            <div>
+              <label class="f-label">Organizer Email</label>
+              <input class="f-input" type="email" id="orgEmail" placeholder="your@email.com" required>
+            </div>
+          </div>
+
+          <button class="f-btn" type="submit">🚀 Submit Event</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ══ ACHIEVEMENTS ══ -->
+    <div class="view" id="view-achievements">
+      <div class="ach-header">
+        <h1>🏆 SocialStack Achievements</h1>
+        <p>Celebrating the success of our students</p>
+      </div>
+      <div class="ach-grid">
+        <div class="ach-card"><div class="ach-img">🎤</div><div class="ach-body"><h3>Best Speaker – TechFest 2026</h3><p>Vedant Shah won the Best Speaker award for his outstanding presentation on AI innovations.</p></div></div>
+        <div class="ach-card"><div class="ach-img">💻</div><div class="ach-body"><h3>Hackathon Champions</h3><p>Team Innovators secured 1st place in the National Hackathon with their smart agriculture solution.</p></div></div>
+        <div class="ach-card"><div class="ach-img">🕺</div><div class="ach-body"><h3>Cultural Excellence</h3><p>Our dance crew won the inter-college cultural fest, showcasing creativity and teamwork.</p></div></div>
+        <div class="ach-card"><div class="ach-img">🥇</div><div class="ach-body"><h3>Sports Championship</h3><p>Our cricket team clinched the inter-college trophy with an unbeaten streak this season.</p></div></div>
+        <div class="ach-card"><div class="ach-img">🔬</div><div class="ach-body"><h3>Research Excellence Award</h3><p>Dr. Meera's team published a breakthrough paper on quantum computing in an IEEE journal.</p></div></div>
+        <div class="ach-card"><div class="ach-img">🎨</div><div class="ach-body"><h3>Design Fest Winner</h3><p>Riya Patel took home gold at the state-level UI/UX design competition.</p></div></div>
+      </div>
+    </div>
+
+    <!-- ══ MY EVENTS ══ -->
+    <div class="view" id="view-events">
+      <div class="page-header">
+        <h2>My Events</h2>
+        <p>Track all events you have registered or submitted</p>
+      </div>
+      <div class="events-table">
+        <table>
+          <thead>
+            <tr><th>Event Name</th><th>Date</th><th>Category</th><th>Status</th><th>Action</th></tr>
+          </thead>
+          <tbody id="myEventsTableBody">
+            <tr>
+              <td colspan="5" style="text-align:center; color:#94a3b8; padding:40px;">
+                📭 No events registered yet.
+                <span style="color:#6366f1; cursor:pointer; font-weight:600;" onclick="showView('browse')">Browse events →</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ NOTIFICATIONS ══ -->
+    <div class="view" id="view-notifications">
+      <div class="page-header">
+        <h2>Notifications</h2>
+        <p>Stay updated with the latest alerts</p>
+      </div>
+      <div class="notif-list">
+        <div class="notif-item unread">
+          <div class="notif-icon">📢</div>
+          <div class="notif-text">
+            <h4>Welcome to SocialStack!</h4>
+            <p>Your account has been set up successfully. Start exploring events.</p>
+          </div>
+          <div class="notif-time">Just now</div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-icon">🎉</div>
+          <div class="notif-text">
+            <h4>TechFest 2026 is Open for Registration</h4>
+            <p>Don't miss the biggest tech festival of the year. Register before March 10.</p>
+          </div>
+          <div class="notif-time">2 days ago</div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-icon">🏆</div>
+          <div class="notif-text">
+            <h4>Hackathon Results Announced</h4>
+            <p>Congratulations to all participants. Check Achievements for details.</p>
+          </div>
+          <div class="notif-time">5 days ago</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ANALYTICS ══ -->
+    <div class="view" id="view-analytics">
+      <div class="page-header">
+        <h2>Analytics</h2>
+        <p>Overview of your event participation stats</p>
+      </div>
+      <div class="analytics-grid">
+        <div class="analytics-card"><div class="a-icon">📅</div><div class="a-val" id="anJoined">0</div><div class="a-lbl">Total Events Joined</div></div>
+        <div class="analytics-card"><div class="a-icon">✅</div><div class="a-val" id="anAttended">0</div><div class="a-lbl">Events Attended</div></div>
+        <div class="analytics-card"><div class="a-icon">⏳</div><div class="a-val" id="anPending">0</div><div class="a-lbl">Pending Approvals</div></div>
+        <div class="analytics-card"><div class="a-icon">🏅</div><div class="a-val">6</div><div class="a-lbl">College Achievements</div></div>
+        <div class="analytics-card"><div class="a-icon">📊</div><div class="a-val" id="anRate">0%</div><div class="a-lbl">Attendance Rate</div></div>
+        <div class="analytics-card"><div class="a-icon">➕</div><div class="a-val" id="anSubmitted">0</div><div class="a-lbl">Events Submitted</div></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<footer style="background:#1e293b;color:#94a3b8;text-align:center;padding:14px;font-size:12px;">
+  <p>&copy; 2026 SocialStack &nbsp;|&nbsp; College Event Management &nbsp;|&nbsp; Contact: info@college.edu</p>
+</footer>
+
+<div id="toast"></div>
+
+<script>
+  const API = 'http://localhost:8080/api';
+  let allEvents = [];
+  let registeredEventIds = new Set();
+  const userId = localStorage.getItem('userId');
+
+  // Helper: returns headers with JWT token attached
+  function authHeaders(extra = {}) {
+    const token = localStorage.getItem('authToken') || '';
+    return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...extra };
+  }
+
+  /* ── SIDEBAR ── */
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('active');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('active');
+  }
+
+  /* ── VIEWS ── */
+  function showView(name) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    const target = document.getElementById('view-' + name);
+    if (target) target.classList.add('active');
+    document.querySelectorAll('.sidebar-link').forEach(l => {
+      l.classList.toggle('active', l.dataset.view === name);
+    });
+    document.querySelectorAll('.nav-tab').forEach(l => {
+      l.classList.toggle('active', l.dataset.view === name);
+    });
+    if (name === 'browse') renderEventCards();
+    if (name === 'notifications') loadNotifications();
+  }
+
+  function notifBorderColor(variant) {
+    var v = (variant || 'info').toLowerCase();
+    if (v === 'success') return '#10b981';
+    if (v === 'warning') return '#f59e0b';
+    if (v === 'danger') return '#ef4444';
+    return '#6366f1';
+  }
+
+  function formatNotifTime(iso) {
+    if (!iso) return '';
+    try {
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return '';
+      var now = new Date();
+      var diff = Math.floor((now - d) / 1000);
+      if (diff < 60) return 'Just now';
+      if (diff < 3600) return Math.floor(diff / 60) + ' min ago';
+      if (diff < 86400) return Math.floor(diff / 3600) + ' h ago';
+      if (diff < 604800) return Math.floor(diff / 86400) + ' d ago';
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch (e) { return ''; }
+  }
+
+  async function loadNotifications() {
+    var root = document.getElementById('notificationListRoot');
+    if (!root) return;
+    var welcome = '<div class="notif-item unread" style="border-left-color:#10b981">' +
+      '<div class="notif-icon">📢</div><div class="notif-text"><h4>Welcome to SocialStack!</h4>' +
+      '<p>Your account is ready. Submit an event for faculty approval — you will see status updates here.</p></div>' +
+      '<div class="notif-time">—</div></div>';
+
+    if (!userId || !localStorage.getItem('authToken')) {
+      root.innerHTML = welcome + '<div style="padding:12px;color:#94a3b8;font-size:13px;">Log in to load approval alerts.</div>';
+      return;
+    }
+
+    var dynamic = [];
+    try {
+      var res = await fetch(API + '/notifications', { headers: authHeaders() });
+      if (res.ok) dynamic = await res.json();
+    } catch (e) { /* ignore */ }
+
+    var rows = (dynamic || []).map(function (n) {
+      var border = notifBorderColor(n.variant);
+      return '<div class="notif-item" style="border-left-color:' + border + '">' +
+        '<div class="notif-icon">' + (n.icon || '🔔') + '</div>' +
+        '<div class="notif-text"><h4>' + escapeHtml(n.title || 'Notification') + '</h4>' +
+        '<p>' + escapeHtml(n.message || '') + '</p></div>' +
+        '<div class="notif-time">' + escapeHtml(formatNotifTime(n.at)) + '</div></div>';
+    }).join('');
+
+    root.innerHTML = welcome + rows;
+  }
+
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = 'show ' + type;
+    setTimeout(() => { t.className = ''; }, 3000);
+  }
+
+  /* ── PROFILE ── */
+  function loadProfile() {
+    const email = localStorage.getItem('userEmail') || '—';
+    const name  = localStorage.getItem('userName')  || email.split('@')[0];
+    const dept  = localStorage.getItem('userDept')  || '—';
+    document.getElementById('studentName').textContent       = name;
+    document.getElementById('studentMeta').textContent       = dept + ' · ' + email;
+    document.getElementById('studentAvatar').textContent     = name.substring(0,2).toUpperCase();
+    document.getElementById('studentDeptBadge').textContent  = dept;
+  }
+
+  /* ── FETCH ALL EVENTS ── */
+  async function fetchAllEvents() {
+    try {
+      const res = await fetch(`${API}/events`);
+      const raw = await res.json();
+      // Students only browse events that are approved (pending events are not visible here).
+      allEvents = (raw || []).filter(e => (e.status || '').toUpperCase() === 'APPROVED');
+    } catch (e) {
+      allEvents = [];
+    }
+  }
+
+  /* ── FETCH MY REGISTRATIONS ── */
+  async function fetchMyRegistrations() {
+    if (!userId) return;
+    try {
+      const res  = await fetch(`${API}/registrations/student/${userId}`, { headers: authHeaders() });
+      const data = await res.json();
+      registeredEventIds = new Set((data||[]).map(r => r.eventId));
+      renderMyEvents(data || []);
+      updateStats(data || []);
+    } catch (e) { /* ignore */ }
+  }
+
+  function escapeHtml(s) {
+    if (s == null || s === '') return '';
+    var t = document.createElement('div');
+    t.textContent = s;
+    return t.innerHTML;
+  }
+
+  function formatCategoryDisplayName(rawKey) {
+    const s = (rawKey || 'other').trim();
+    if (!s) return 'Other';
+    return s.split(/[\s_-]+/).filter(Boolean).map(function (w) {
+      return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+    }).join(' ');
+  }
+
+  /** Dynamic bars: tags/categories with most registrations appear first; bar = % of your total joined events in that tag. */
+  function renderParticipationByCategory(registrations) {
+    var container = document.getElementById('categoryBars');
+    if (!container) return;
+    var list = registrations || [];
+    var total = list.length;
+    if (total === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:18px 12px;color:#94a3b8;font-size:13px;line-height:1.5;">Register for events to see which categories you participate in most.</div>';
+      return;
+    }
+    var counts = {};
+    list.forEach(function (r) {
+      var key = (r.category || 'other').trim().toLowerCase() || 'other';
+      counts[key] = (counts[key] || 0) + 1;
+    });
+    var sorted = Object.keys(counts).map(function (k) {
+      return [k, counts[k]];
+    }).sort(function (a, b) {
+      return b[1] - a[1];
+    }).slice(0, 12);
+
+    var palette = ['#6366f1', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#14b8a6', '#f43f5e', '#84cc16', '#a855f7', '#0ea5e9', '#d946ef'];
+
+    container.innerHTML = sorted.map(function (entry, i) {
+      var key = entry[0];
+      var count = entry[1];
+      var pct = Math.round((count / total) * 100);
+      var label = formatCategoryDisplayName(key);
+      var col = palette[i % palette.length];
+      var evLabel = count === 1 ? 'event' : 'events';
+      return (
+        '<div class="category-row">' +
+          '<div class="cat-label">' +
+            '<span>' + escapeHtml(label) + '</span>' +
+            '<span>' + pct + '% · ' + count + ' ' + evLabel + '</span>' +
+          '</div>' +
+          '<div class="bar-bg"><div class="bar-fill" style="width:' + pct + '%;background:' + col + ';"></div></div>' +
+        '</div>'
+      );
+    }).join('');
+  }
+
+  /* ── UPDATE STATS ── */
+  function updateStats(registrations) {
+    const total   = registrations.length;
+    const pending = registrations.filter(r => (r.status||'').toLowerCase() === 'pending').length;
+    const attended = registrations.filter(r => (r.status||'').toLowerCase() === 'attended').length;
+    const rate    = total > 0 ? Math.round((attended / total) * 100) : 0;
+
+    document.getElementById('statJoined').textContent  = total;
+    document.getElementById('statPending').textContent = pending;
+    document.getElementById('sParticipated').textContent = total;
+    document.getElementById('sPending').textContent    = pending;
+    document.getElementById('sAttended').textContent   = attended;
+    document.getElementById('sAttRate').textContent    = rate + '%';
+    document.getElementById('anJoined').textContent    = total;
+    document.getElementById('anAttended').textContent  = attended;
+    document.getElementById('anPending').textContent   = pending;
+    document.getElementById('anRate').textContent      = rate + '%';
+
+    renderParticipationByCategory(registrations);
+  }
+
+  /* ── RENDER MY EVENTS ── */
+  function renderMyEvents(registrations) {
+    const homeCard = document.getElementById('myRegisteredEvents');
+    const tbody = document.getElementById('myEventsTableBody');
+    const emptyHome = `
+      <div class="empty-state">
+        <div class="e-icon">📭</div>
+        <p>You haven't joined any events yet.<br>
+          <span style="color:#6366f1; cursor:pointer; font-weight:600;" onclick="showView('browse')">Browse events →</span>
+        </p>
+      </div>`;
+    const emptyTable = `
+      <tr>
+        <td colspan="5" style="text-align:center; color:#94a3b8; padding:40px;">
+          📭 No events registered yet.
+          <span style="color:#6366f1; cursor:pointer; font-weight:600;" onclick="showView('browse')">Browse events →</span>
+        </td>
+      </tr>`;
+
+    if (!registrations || !registrations.length) {
+      homeCard.innerHTML = emptyHome;
+      tbody.innerHTML = emptyTable;
+      return;
+    }
+
+    tbody.innerHTML = registrations.map(r => `
+      <tr>
+        <td><strong>${r.eventName||'—'}</strong></td>
+        <td>${r.eventDate||'—'}</td>
+        <td>${r.category||'—'}</td>
+        <td><span style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:${statusColor(r.status)}">${r.status||'Registered'}</span></td>
+        <td><button onclick="cancelRegistration(${r.id})" style="background:#fee2e2;color:#991b1b;border:none;padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;">Cancel</button></td>
+      </tr>`).join('');
+
+    homeCard.innerHTML = registrations.slice(0,4).map(r => `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f1f5f9;">
+        <div style="width:8px;height:8px;border-radius:50%;background:#6366f1;flex-shrink:0"></div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#1e293b">${r.eventName||'—'}</div>
+          <div style="font-size:11px;color:#94a3b8">${r.eventDate||'—'} · ${r.category||'—'}</div>
+        </div>
+        <span style="margin-left:auto;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;background:${statusColor(r.status)}">${r.status||'Registered'}</span>
+      </div>`).join('');
+  }
+
+  function statusColor(s) {
+    const st = (s||'').toLowerCase();
+    if (st === 'attended') return '#d1fae5;color:#065f46';
+    if (st === 'pending')  return '#fef9c3;color:#854d0e';
+    if (st === 'rejected') return '#fee2e2;color:#991b1b';
+    return '#dbeafe;color:#1d4ed8';
+  }
+
+  /* ── RENDER EVENT CARDS ── */
+  function renderEventCards() {
+    const search = (document.getElementById('searchInput').value||'').toLowerCase();
+    const cat    = (document.getElementById('catFilter').value||'').toLowerCase();
+    const filtered = allEvents.filter(e => {
+      const matchSearch = !search || (e.eventName||'').toLowerCase().includes(search) || (e.description||'').toLowerCase().includes(search);
+      const matchCat    = !cat    || (e.category||'').toLowerCase() === cat;
+      return matchSearch && matchCat;
+    });
+
+    const grid = document.getElementById('eventCardsGrid');
+    if (!filtered.length) {
+      grid.innerHTML = `<div class="loading-cards" style="grid-column:1/-1">😕 No events match your filters.</div>`;
+      return;
+    }
+
+    grid.innerHTML = filtered.map(e => {
+      const isRegistered = registeredEventIds.has(e.id);
+      const isFull = e.maxParticipants && e.currentParticipants >= e.maxParticipants;
+      const spotsLeft = e.maxParticipants ? (e.maxParticipants - (e.currentParticipants||0)) : null;
+      return `
+        <div class="event-card">
+          <span class="ec-cat">${(e.category||'Other').charAt(0).toUpperCase()+(e.category||'other').slice(1)}</span>
+          <h4>${e.eventName||'—'}</h4>
+          <div class="ec-meta">📅 ${e.eventDate||'TBD'} ${e.eventTime ? '· ⏰ ' + e.eventTime : ''}</div>
+          <div class="ec-meta">📍 ${e.location||'TBD'}</div>
+          <div class="ec-meta">👤 ${e.organizer||'—'}</div>
+          ${e.description ? `<div class="ec-desc">${e.description.substring(0,90)}${e.description.length>90?'...':''}</div>` : ''}
+          ${spotsLeft !== null ? `<div class="ec-spots${isFull?' full':''}">
+            ${isFull ? '❌ Event Full' : `✅ ${spotsLeft} spots left`}
+          </div>` : ''}
+          ${isRegistered
+            ? `<button class="btn-registered" disabled>✅ Already Registered</button>`
+            : `<button class="btn-register" onclick="registerEvent(${e.id}, this)" ${isFull?'disabled':''}>
+                ${isFull ? '🚫 Full' : '📝 Register Now'}
+              </button>`
+          }
+        </div>`;
+    }).join('');
+  }
+
+  function filterEvents() { renderEventCards(); }
+
+  /* ── REGISTER FOR EVENT ── */
+  async function registerEvent(eventId, btn) {
+    if (!userId) { showToast('Please log in first.', 'error'); return; }
+    btn.disabled = true;
+    btn.textContent = '⏳ Registering...';
+    try {
+      const res = await fetch(`${API}/registrations/register`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ studentId: parseInt(userId), eventId: parseInt(eventId) })
+      });
+      const text = await res.text();
+      if (res.ok) {
+        registeredEventIds.add(eventId);
+        btn.outerHTML = `<button class="btn-registered" disabled>✅ Already Registered</button>`;
+        showToast('🎉 Registered successfully!', 'success');
+        await fetchMyRegistrations();
+      } else {
+        btn.disabled = false;
+        btn.textContent = '📝 Register Now';
+        showToast(text || 'Registration failed.', 'error');
+      }
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = '📝 Register Now';
+      showToast('Cannot connect to server.', 'error');
+    }
+  }
+
+  /* ── CANCEL REGISTRATION ── */
+  async function cancelRegistration(regId) {
+    if (!confirm('Cancel this registration?')) return;
+    try {
+      const res = await fetch(`${API}/registrations/${regId}`, { method: 'DELETE', headers: authHeaders() });
+      if (res.ok) {
+        showToast('Registration cancelled.', 'error');
+        await fetchMyRegistrations();
+        await fetchAllEvents();
+        renderEventCards();
+      } else { showToast('Could not cancel.', 'error'); }
+    } catch (e) { showToast('Server error.', 'error'); }
+  }
+
+  /* ── SUBMIT EVENT ── */
+  document.getElementById('eventForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const msg = document.getElementById('formMsg');
+    msg.className = 'form-msg'; msg.textContent = '';
+
+    const data = {
+      eventName:   document.getElementById('eventName').value,
+      eventDate:   document.getElementById('eventDate').value,
+      eventTime:   document.getElementById('eventTime').value,
+      location:    document.getElementById('location').value,
+      category:    document.getElementById('category').value,
+      description: document.getElementById('description').value,
+      organizer:   document.getElementById('organizer').value,
+      email:       document.getElementById('orgEmail').value,
+      submittedBy: userId ? parseInt(userId, 10) : null
+    };
+
+    try {
+      const response = await fetch(`${API}/events/submit`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify(data)
+      });
+      const text = await response.text();
+      if (response.ok) {
+        msg.className = 'form-msg success';
+        msg.textContent = '✅ Event submitted successfully! Pending faculty approval.';
+        e.target.reset();
+        const an = document.getElementById('anSubmitted');
+        if (an) an.textContent = parseInt(an.textContent||0) + 1;
+        loadNotifications();
+        setTimeout(() => showView('profile'), 1800);
+      } else {
+        msg.className = 'form-msg error';
+        msg.textContent = text || 'Submission failed. Try again.';
+      }
+    } catch (err) {
+      msg.className = 'form-msg error';
+      msg.textContent = 'Cannot connect to server. Is Spring Boot running?';
+    }
+  });
+
+  function logout() {
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userDept');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('authToken');
+    window.location.href = 'Login.html';
+  }
+
+  /* ── INIT ── */
+  async function init() {
+    loadProfile();
+    await fetchAllEvents();
+    await fetchMyRegistrations();
+    loadNotifications();
+  }
+
+  init();
+</script>
+</body>
+</html>

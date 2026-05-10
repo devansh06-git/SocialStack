@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | SocialStack</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    nav {
+      background: #1e293b;
+      padding: 14px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    nav .logo { color: white; font-size: 18px; font-weight: bold; }
+    nav a { color: #cbd5e1; text-decoration: none; margin-left: 20px; font-size: 14px; }
+    nav a:hover { color: white; }
+
+    .page {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+    }
+    .form-container {
+      background: #fff;
+      padding: 35px 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    /* COLOR STRIP at top */
+    .role-strip {
+      height: 5px;
+      border-radius: 10px 10px 0 0;
+      margin: -35px -30px 26px -30px;
+      background: #4f46e5;
+      transition: background 0.3s;
+    }
+
+    h2 { text-align: center; margin-bottom: 4px; color: #333; }
+    .subtitle { text-align: center; font-size: 13px; color: #94a3b8; margin-bottom: 22px; }
+
+    /* ── ROLE SELECTOR ── */
+    .role-selector { display: flex; gap: 10px; margin-bottom: 22px; }
+    .role-btn {
+      flex: 1;
+      padding: 10px 6px;
+      border-radius: 8px;
+      border: 2px solid #e2e8f0;
+      background: #f8fafc;
+      cursor: pointer;
+      font-size: 12px;
+      font-family: Arial, sans-serif;
+      font-weight: 600;
+      color: #64748b;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .role-btn .icon { font-size: 22px; display: block; margin-bottom: 5px; }
+    .role-btn:hover { border-color: #4f46e5; background: #eef2ff; color: #4338ca; }
+    .role-btn.active-student { border-color: #4f46e5; background: #eef2ff; color: #3730a3; }
+    .role-btn.active-faculty { border-color: #0891b2; background: #ecfeff; color: #0e7490; }
+
+    label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; font-size: 14px; }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+      font-family: Arial, sans-serif;
+    }
+    input:focus { outline: none; border-color: #4f46e5; }
+
+    #loginBtn {
+      width: 100%;
+      padding: 12px;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 15px;
+      cursor: pointer;
+      font-family: Arial, sans-serif;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    #loginBtn:hover    { background: #4338ca; }
+    #loginBtn:disabled { background: #a5b4fc; cursor: not-allowed; }
+
+    .signup-link { text-align: center; margin-top: 14px; font-size: 14px; color: #555; }
+    .signup-link a { color: #4f46e5; text-decoration: none; }
+    .signup-link a:hover { text-decoration: underline; }
+
+    .msg { text-align: center; margin-bottom: 12px; font-size: 14px; padding: 8px; border-radius: 5px; display: none; }
+    .msg.success { background: #d1fae5; color: #065f46; display: block; }
+    .msg.error   { background: #fee2e2; color: #991b1b; display: block; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <span class="logo">🎓 SocialStack</span>
+    <div>
+      <a href="signup.html">Sign Up</a>
+      <a href="login.html">Login</a>
+    </div>
+  </nav>
+
+  <div class="page">
+    <div class="form-container">
+
+      <div class="role-strip" id="roleStrip"></div>
+
+      <h2>Welcome Back</h2>
+      <p class="subtitle" id="subtitle">Login as Student</p>
+
+      <!-- ROLE SELECTOR BUTTONS -->
+      <div class="role-selector">
+        <button type="button" class="role-btn active-student" id="btn-student" onclick="setRole('student')">
+          <span class="icon">🎓</span>Student
+        </button>
+        <button type="button" class="role-btn" id="btn-faculty" onclick="setRole('faculty')">
+          <span class="icon">👨‍🏫</span>Faculty
+        </button>
+      </div>
+
+      <div id="msg" class="msg"></div>
+
+      <form id="loginForm">
+        <label for="identifier">College Email or College ID</label>
+        <input type="text" id="identifier" placeholder="Email or College ID" required>
+
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter your password" required>
+
+        <button type="submit" id="loginBtn">Login as Student</button>
+      </form>
+
+      <div class="signup-link">
+        Don't have an account? <a href="signup.html">Sign up here</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentRole = 'student';
+
+    const roleConfig = {
+      student: {
+        subtitle:    'Login as Student',
+        btnText:     'Login as Student',
+        activeClass: 'active-student',
+        stripColor:  '#4f46e5',
+        redirect:    'Dashboard1.html'
+      },
+      faculty: {
+        subtitle:    'Login as Faculty',
+        btnText:     'Login as Faculty',
+        activeClass: 'active-faculty',
+        stripColor:  '#0891b2',
+        redirect:    'FacultyDashboard.html'
+      },
+    };
+
+    function setRole(role) {
+      currentRole = role;
+      const cfg   = roleConfig[role];
+
+      // Update strip color, subtitle, button text
+      document.getElementById('roleStrip').style.background = cfg.stripColor;
+      document.getElementById('subtitle').textContent       = cfg.subtitle;
+      document.getElementById('loginBtn').textContent       = cfg.btnText;
+      document.getElementById('loginBtn').style.background  = cfg.stripColor;
+
+      // Reset all buttons then activate selected
+      ['student','faculty'].forEach(r => {
+        document.getElementById('btn-' + r).className = 'role-btn';
+      });
+      document.getElementById('btn-' + role).className = 'role-btn ' + cfg.activeClass;
+    }
+
+    // Set initial strip color
+    setRole('student');
+
+    // ── LOGIN SUBMIT ──
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const msg = document.getElementById('msg');
+      const btn = document.getElementById('loginBtn');
+
+      msg.className   = 'msg';
+      msg.textContent = '';
+      btn.disabled    = true;
+      btn.textContent = 'Logging in...';
+
+      const data = {
+        identifier: document.getElementById('identifier').value.trim(),
+        password:   document.getElementById('password').value,
+        role: currentRole === 'faculty' ? 'FACULTY' : 'STUDENT'
+      };
+
+      try {
+        const response = await fetch('http://localhost:8080/api/auth/login', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(data)
+        });
+
+        const text = await response.text();
+
+        if (response.ok) {
+          msg.className   = 'msg success';
+          msg.textContent = 'Login successful! Redirecting...';
+
+          try {
+            const json = JSON.parse(text);
+            localStorage.setItem('userId',    json.userId     || '');
+            localStorage.setItem('userName',  json.fullName   || '');
+            localStorage.setItem('userEmail', json.email      || data.identifier);
+            localStorage.setItem('userDept',  json.department || '');
+            localStorage.setItem('userRole',  json.role       || currentRole);
+            localStorage.setItem('authToken', json.token      || '');
+          } catch {
+            localStorage.setItem('userEmail', data.identifier);
+            localStorage.setItem('userRole',  currentRole);
+          }
+
+          // Redirect to correct dashboard based on role
+          setTimeout(() => {
+            window.location.href = roleConfig[currentRole].redirect;
+          }, 1200);
+
+        } else {
+          let errorMessage = 'Login failed. Please check your credentials.';
+          try {
+            const json = JSON.parse(text);
+            errorMessage = json.message || json.error || errorMessage;
+          } catch { if (text) errorMessage = text; }
+
+          if (response.status === 401) errorMessage = 'Incorrect email/ID or password.';
+          if (response.status === 404) errorMessage = 'Account not found. Please sign up first.';
+          if (response.status === 403) errorMessage = 'Your account is not authorized.';
+          if (response.status === 500) errorMessage = 'Server error. Please try again later.';
+
+          msg.className   = 'msg error';
+          msg.textContent = errorMessage;
+          btn.disabled    = false;
+          btn.textContent = roleConfig[currentRole].btnText;
+          btn.style.background = roleConfig[currentRole].stripColor;
+        }
+
+      } catch (err) {
+        msg.className   = 'msg error';
+        msg.textContent = 'Cannot connect to server. Is Spring Boot running?';
+        btn.disabled    = false;
+        btn.textContent = roleConfig[currentRole].btnText;
+        btn.style.background = roleConfig[currentRole].stripColor;
+      }
+    });
+  </script>
+
+</body>
+</html>

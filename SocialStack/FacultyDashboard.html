@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SocialStack | Faculty Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background: #f1f5f9; display: flex; flex-direction: column; min-height: 100vh; }
+
+        /* NAVBAR */
+        nav { background: #1e293b; padding: 14px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        nav .logo { color: white; font-size: 18px; font-weight: 700; letter-spacing: 0.3px; }
+        nav .logo span { color: #6366f1; }
+        nav .nav-links a { color: #cbd5e1; text-decoration: none; margin-left: 20px; font-size: 14px; padding: 6px 12px; border-radius: 5px; transition: background 0.2s; cursor: pointer; }
+        nav .nav-links a:hover { background: #334155; color: white; }
+        nav .nav-links a.active { background: #4f46e5; color: white; }
+        .logout-btn { background: #ef4444; color: white; border: none; padding: 7px 14px; border-radius: 5px; cursor: pointer; font-size: 13px; margin-left: 20px; font-family: 'Poppins', sans-serif; }
+        .logout-btn:hover { background: #dc2626; }
+
+        /* HAMBURGER */
+        .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
+        .hamburger span { width: 22px; height: 2px; background: #cbd5e1; border-radius: 2px; display: block; transition: all 0.3s; }
+
+        /* LAYOUT */
+        .layout { display: flex; flex: 1; position: relative; }
+
+        /* SIDEBAR */
+        aside { width: 220px; background: #1e293b; color: white; padding: 24px 16px; min-height: calc(100vh - 52px); transition: transform 0.3s; flex-shrink: 0; }
+        aside h3 { font-size: 11px; color: #64748b; text-transform: uppercase; margin-bottom: 14px; letter-spacing: 1px; }
+        aside ul { list-style: none; }
+        aside ul li { margin-bottom: 4px; }
+        aside ul li a { color: #cbd5e1; text-decoration: none; display: block; padding: 9px 12px; border-radius: 6px; font-size: 13px; transition: background 0.2s; cursor: pointer; }
+        aside ul li a:hover { background: #334155; color: white; }
+        aside ul li a.active { background: #4f46e5; color: white; }
+
+        /* MAIN */
+        main { flex: 1; padding: 28px; overflow-y: auto; }
+
+        /* VIEWS */
+        .view { display: none; }
+        .view.active { display: block; }
+
+        /* PROFILE CARD */
+        .profile-card { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border-radius: 16px; padding: 28px; margin-bottom: 24px; display: flex; align-items: center; gap: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); flex-wrap: wrap; }
+        .profile-avatar { width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b, #ef4444); display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; color: white; border: 3px solid rgba(255,255,255,0.2); flex-shrink: 0; }
+        .profile-info h2 { color: white; font-size: 20px; font-weight: 600; }
+        .profile-info p  { color: #94a3b8; font-size: 13px; margin-top: 4px; }
+        .profile-tags { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+        .tag { padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+        .tag.role   { background: #f59e0b; color: white; }
+        .tag.dept   { background: #0891b2; color: white; }
+        .tag.status { background: #16a34a; color: white; }
+        .profile-stats { margin-left: auto; display: flex; gap: 24px; text-align: center; flex-wrap: wrap; }
+        .profile-stat p    { color: white; font-size: 28px; font-weight: 700; transition: transform 0.3s; }
+        .profile-stat p.bump { transform: scale(1.3); }
+        .profile-stat span { color: #94a3b8; font-size: 11px; }
+
+        /* STATS GRID */
+        .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left: 4px solid #4f46e5; transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); }
+        .stat-card h3 { font-size: 12px; color: #64748b; margin-bottom: 8px; font-weight: 500; }
+        .stat-card p  { font-size: 26px; font-weight: 700; color: #1e293b; }
+
+        /* GRID 2 */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .section-card { background: white; border-radius: 12px; padding: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .section-card h2 { font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; }
+        .section-card h2 span { font-size: 12px; color: #64748b; font-weight: 400; }
+
+        /* EVENT ITEMS */
+        .event-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f8fafc; }
+        .event-item:last-child { border-bottom: none; }
+        .event-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .event-info h4 { font-size: 13px; font-weight: 500; color: #1e293b; }
+        .event-info p  { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+        .event-badge { margin-left: auto; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+        .badge-green  { background: #d1fae5; color: #065f46; }
+        .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+        .badge-yellow { background: #fef9c3; color: #854d0e; }
+        .badge-orange { background: #ffedd5; color: #9a3412; }
+        .badge-red    { background: #fee2e2; color: #991b1b; }
+
+        /* TABLE */
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        thead tr { background: #f8fafc; }
+        th { padding: 10px 12px; text-align: left; color: #64748b; font-weight: 500; font-size: 12px; }
+        td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #f8fafc; }
+        .btn-approve { background: #d1fae5; color: #065f46; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; margin-right: 4px; font-family: 'Poppins', sans-serif; }
+        .btn-reject  { background: #fee2e2; color: #991b1b; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; font-family: 'Poppins', sans-serif; }
+        .btn-approve:hover { background: #a7f3d0; }
+        .btn-reject:hover  { background: #fecaca; }
+
+        /* ROLE TOGGLE */
+        .role-toggle { display: flex; gap: 10px; margin-bottom: 16px; }
+        .role-btn { flex: 1; padding: 10px; border-radius: 8px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-size: 13px; font-family: 'Poppins', sans-serif; font-weight: 500; color: #64748b; transition: all 0.2s; }
+        .role-btn.selected-head  { border-color: #f59e0b; background: #fffbeb; color: #92400e; }
+        .role-btn.selected-coord { border-color: #4f46e5; background: #eef2ff; color: #3730a3; }
+
+        /* FORM ELEMENTS */
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 5px; }
+        .form-group select, .form-group input, .form-group textarea {
+          width: 100%; padding: 9px 12px; border: 1px solid #e2e8f0; border-radius: 6px;
+          font-size: 13px; font-family: 'Poppins', sans-serif; outline: none;
+        }
+        .form-group select:focus, .form-group input:focus, .form-group textarea:focus { border-color: #4f46e5; }
+        .btn-submit { width: 100%; padding: 11px; background: #4f46e5; color: white; border: none; border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; }
+        .btn-submit:hover { background: #4338ca; }
+
+        /* SUBMIT EVENT FORM (integrated) */
+        .submit-view-wrap { max-width: 700px; }
+        .submit-view-wrap .section-card { margin-bottom: 0; }
+        .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .f-textarea { width: 100%; padding: 9px 12px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 13px; font-family: 'Poppins', sans-serif; resize: vertical; }
+        .f-textarea:focus { outline: none; border-color: #4f46e5; }
+
+        /* MISC */
+        .empty-state { text-align: center; padding: 30px 20px; color: #94a3b8; }
+        .empty-state .empty-icon { font-size: 36px; margin-bottom: 10px; }
+        .empty-state p { font-size: 13px; }
+        .msg { font-size: 13px; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; display: none; }
+        .msg.success { background: #d1fae5; color: #065f46; display: block; }
+        .msg.error   { background: #fee2e2; color: #991b1b; display: block; }
+        #toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px; z-index: 9999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        #toast.show    { opacity: 1; }
+        #toast.success { background: #16a34a; }
+        #toast.error   { background: #dc2626; }
+
+        footer { background: #1e293b; color: #94a3b8; text-align: center; padding: 14px; font-size: 12px; }
+
+        /* FACULTY EVENTS WITH ENROLLED STUDENTS */
+        .fac-event-block { border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 16px; overflow: hidden; }
+        .fac-event-header { background: #f8fafc; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+        .fac-event-header h4 { font-size: 14px; font-weight: 600; color: #1e293b; }
+        .fac-event-header .fac-meta { font-size: 12px; color: #64748b; }
+        .fac-event-header .joined-badge { background: #4f46e5; color: white; padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .enrolled-list { padding: 12px 16px; }
+        .enrolled-list .student-chip { display: inline-flex; align-items: center; gap: 6px; background: #ede9fe; color: #5b21b6; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; margin: 3px; }
+        .enrolled-list .no-enrollees { font-size: 13px; color: #94a3b8; font-style: italic; padding: 4px 0; }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+          .stats { grid-template-columns: repeat(3, 1fr); }
+          .grid-2 { grid-template-columns: 1fr; }
+          .f-row { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+          .hamburger { display: flex; }
+          aside { position: fixed; left: 0; top: 52px; height: calc(100vh - 52px); z-index: 200; transform: translateX(-100%); }
+          aside.open { transform: translateX(0); }
+          .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 199; }
+          .sidebar-overlay.active { display: block; }
+          main { padding: 16px; }
+          .stats { grid-template-columns: repeat(2, 1fr); }
+          .profile-card { flex-direction: column; align-items: flex-start; gap: 16px; }
+          .profile-stats { margin-left: 0; }
+          nav .nav-links { display: none; }
+          .profile-stat p { font-size: 22px; }
+        }
+        @media (max-width: 480px) {
+          .stats { grid-template-columns: 1fr 1fr; }
+          .role-toggle { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <span class="logo">🎓 <span>Social</span>Stack</span>
+    <div class="nav-links">
+        <a onclick="showView('dashboard')" class="active" id="nav-dashboard">Home</a>
+        <a onclick="showView('dashboard')">Faculty Panel</a>
+        <a onclick="showView('submit')" id="nav-submit">Create Event</a>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+        <span></span><span></span><span></span>
+    </button>
+</nav>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="layout">
+    <aside id="sidebar">
+        <h3>Faculty Panel</h3>
+        <ul>
+            <li><a onclick="showView('dashboard');closeSidebar()">🏠 Home</a></li>
+            <li><a onclick="showView('dashboard');closeSidebar()" class="active" id="sl-dashboard">🛡️ My Dashboard</a></li>
+            <li><a onclick="showView('head-events');closeSidebar()" id="sl-head">👑 Events as Head</a></li>
+            <li><a onclick="showView('coord-events');closeSidebar()" id="sl-coord">🤝 Events as Coordinator</a></li>
+            <li><a onclick="showView('approvals');closeSidebar()" id="sl-approvals">✅ Pending Approvals</a></li>
+            <li><a onclick="showView('participants');closeSidebar()" id="sl-participants">👥 Participants</a></li>
+            <li><a onclick="showView('submit');closeSidebar()" id="sl-submit">➕ Create Event</a></li>
+        </ul>
+    </aside>
+
+    <main>
+
+        <!-- ══ DASHBOARD VIEW ══ -->
+        <div class="view active" id="view-dashboard">
+
+            <!-- PROFILE CARD -->
+            <div class="profile-card">
+                <div class="profile-avatar" id="avatarInitials">FA</div>
+                <div class="profile-info">
+                    <h2 id="facultyName">Loading...</h2>
+                    <p id="facultyMeta">Faculty · SocialStack</p>
+                    <p id="facultyEmail" style="color:#94a3b8;font-size:12px;margin-top:2px;"></p>
+                    <div class="profile-tags">
+                        <span class="tag role">⚡ Faculty</span>
+                        <span class="tag dept" id="facultyDept">—</span>
+                        <span class="tag status">✅ Active</span>
+                    </div>
+                </div>
+                <div class="profile-stats">
+                    <div class="profile-stat">
+                        <p id="statTotalEvents">0</p>
+                        <span>Total Events</span>
+                    </div>
+                    <div class="profile-stat">
+                        <p id="statAsHead">0</p>
+                        <span>As Head</span>
+                    </div>
+                    <div class="profile-stat">
+                        <p id="statAsCoord">0</p>
+                        <span>As Coordinator</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5 STAT CARDS -->
+            <div class="stats">
+                <div class="stat-card" style="border-color:#f59e0b">
+                    <h3>Total Events Held</h3>
+                    <p id="cardTotalEvents">0</p>
+                </div>
+                <div class="stat-card" style="border-color:#ef4444">
+                    <h3>Events as Head</h3>
+                    <p id="cardAsHead">0</p>
+                </div>
+                <div class="stat-card" style="border-color:#4f46e5">
+                    <h3>Events as Coordinator</h3>
+                    <p id="cardAsCoord">0</p>
+                </div>
+                <div class="stat-card" style="border-color:#f97316">
+                    <h3>Pending Approvals</h3>
+                    <p id="cardPending">0</p>
+                </div>
+                <div class="stat-card" style="border-color:#16a34a">
+                    <h3>Participants Managed</h3>
+                    <p id="cardParticipants">0</p>
+                </div>
+            </div>
+
+            <!-- HEAD + COORDINATOR EVENTS -->
+            <div class="grid-2">
+                <div class="section-card">
+                    <h2>👑 Events as Head <span id="headCount">(0)</span></h2>
+                    <div id="headEventsList">
+                        <div class="empty-state"><div class="empty-icon">👑</div><p>No Head events yet.</p></div>
+                    </div>
+                </div>
+                <div class="section-card">
+                    <h2>🤝 Events as Coordinator <span id="coordCount">(0)</span></h2>
+                    <div id="coordEventsList">
+                        <div class="empty-state"><div class="empty-icon">🤝</div><p>No Coordinator events yet.</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ASSIGN ROLE -->
+            <div class="section-card" style="margin-bottom:20px">
+                <h2>🎯 Assign Yourself to an Event</h2>
+                <p style="font-size:12px;color:#64748b;margin-bottom:14px;">Pick an event and select your role.</p>
+                <div id="assignMsg" class="msg"></div>
+                <div class="role-toggle">
+                    <button class="role-btn selected-head" id="btnHead" onclick="selectRole('HEAD')">👑 Head</button>
+                    <button class="role-btn" id="btnCoord" onclick="selectRole('COORDINATOR')">🤝 Coordinator</button>
+                </div>
+                <input type="hidden" id="selectedRole" value="HEAD">
+                <div class="form-group">
+                    <label>Select Event</label>
+                    <select id="eventSelect"><option value="">-- Loading events... --</option></select>
+                </div>
+                <button class="btn-submit" onclick="assignRole()">Assign Me to This Event</button>
+            </div>
+
+            <!-- ALL EVENTS TABLE -->
+            <div class="section-card" style="margin-bottom:20px">
+                <h2>📋 All My Events <span id="allEventsCount">(0)</span></h2>
+                <div id="allEventsContainer">
+                    <div class="empty-state"><div class="empty-icon">📭</div><p>No events assigned yet.</p></div>
+                </div>
+            </div>
+
+        </div><!-- end view-dashboard -->
+
+        <!-- ══ HEAD EVENTS VIEW ══ -->
+        <div class="view" id="view-head-events">
+            <div class="section-card">
+                <h2>👑 Events as Head <span id="headCountFull">(0)</span></h2>
+                <div id="headEventsListFull">
+                    <div class="empty-state"><div class="empty-icon">👑</div><p>No Head events yet.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ COORDINATOR EVENTS VIEW ══ -->
+        <div class="view" id="view-coord-events">
+            <div class="section-card">
+                <h2>🤝 Events as Coordinator <span id="coordCountFull">(0)</span></h2>
+                <div id="coordEventsListFull">
+                    <div class="empty-state"><div class="empty-icon">🤝</div><p>No Coordinator events yet.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ APPROVALS VIEW ══ -->
+        <div class="view" id="view-approvals">
+            <div class="section-card">
+                <h2>✅ Pending Approvals <span id="pendingCount">(0)</span></h2>
+                <div id="approvalsContainer">
+                    <div class="empty-state"><div class="empty-icon">📋</div><p>No pending approvals.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ PARTICIPANTS VIEW ══ -->
+        <div class="view" id="view-participants">
+            <div class="section-card">
+                <h2>👥 Participants in My Events</h2>
+                <div id="participantsContainer">
+                    <div class="empty-state"><div class="empty-icon">👥</div><p>No participant data yet.</p></div>
+                </div>
+            </div>
+
+            <!-- Faculty-Created Events with Enrolled Students -->
+            <div class="section-card" style="margin-top:20px;">
+                <h2>📋 My Created Events & Enrolled Students</h2>
+                <div id="facultyCreatedEventsContainer">
+                    <div class="empty-state"><div class="empty-icon">📭</div><p>No events created yet. Use "Create Event" to add one.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ CREATE EVENT VIEW (Submission Form Integrated) ══ -->
+        <div class="view" id="view-submit">
+            <div class="submit-view-wrap">
+                <div class="section-card">
+                    <h2>➕ Create New Event</h2>
+                    <div id="submitMsg" class="msg"></div>
+                    <div class="form-group">
+                        <label>Event Name</label>
+                        <input type="text" id="eventName" placeholder="Enter event name">
+                    </div>
+                    <div class="f-row">
+                        <div class="form-group">
+                            <label>Event Date</label>
+                            <input type="date" id="eventDate">
+                        </div>
+                        <div class="form-group">
+                            <label>Event Time</label>
+                            <input type="time" id="eventTime">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" id="location" placeholder="Venue / Room / Online">
+                    </div>
+                    <div class="f-row">
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="category">
+                                <option value="">-- Select Category --</option>
+                                <option value="Technical">Technical 💻</option>
+                                <option value="Cultural">Cultural 🎨</option>
+                                <option value="Sports">Sports ⚽</option>
+                                <option value="conference">Conference</option>
+                                <option value="workshop">Workshop</option>
+                                <option value="meetup">Meetup</option>
+                                <option value="seminar">Seminar</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Your Role in This Event</label>
+                            <select id="facultyRole">
+                                <option value="HEAD">👑 Head</option>
+                                <option value="COORDINATOR">🤝 Coordinator</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Event Description</label>
+                        <textarea class="f-textarea" id="description" rows="4" placeholder="Describe the event..."></textarea>
+                    </div>
+                    <div class="f-row">
+                        <div class="form-group">
+                            <label>Organizer Name</label>
+                            <input type="text" id="organizer" placeholder="Your name">
+                        </div>
+                        <div class="form-group">
+                            <label>Organizer Email</label>
+                            <input type="email" id="orgEmail" placeholder="faculty@college.edu">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Max Participants</label>
+                        <input type="number" id="maxParticipants" placeholder="e.g. 100" min="1">
+                    </div>
+                    <button class="btn-submit" onclick="submitEvent()">🚀 Create Event</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<footer>
+    <p>&copy; 2026 SocialStack &nbsp;|&nbsp; College Event Management &nbsp;|&nbsp; Contact: info@college.edu</p>
+</footer>
+<div id="toast"></div>
+
+<script>
+    const API    = 'http://localhost:8080/api';
+    const userId = localStorage.getItem('userId');
+
+    // Helper: returns headers with JWT token attached
+    function authHeaders(extra = {}) {
+      const token = localStorage.getItem('authToken') || '';
+      return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...extra };
+    }
+
+    // ROLE GUARD
+    (function(){
+      var r = (localStorage.getItem('userRole') || '').toLowerCase();
+      if (r === 'student') { window.location.href = 'Dashboard1.html'; }
+    })();
+
+    /* ── SIDEBAR TOGGLE ── */
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebarOverlay').classList.toggle('active');
+    }
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('active');
+    }
+
+    /* ── VIEWS ── */
+    function showView(name) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById('view-' + name).classList.add('active');
+      document.querySelectorAll('aside ul li a').forEach(a => a.classList.remove('active'));
+      const sl = document.getElementById('sl-' + name);
+      if (sl) sl.classList.add('active');
+    }
+
+    function showToast(msg, type = 'success') {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.className = 'show ' + type;
+      setTimeout(() => { t.className = ''; }, 3000);
+    }
+
+    function logout() {
+      ['userEmail','userId','userName','userDept','userRole','authToken'].forEach(k => localStorage.removeItem(k));
+      window.location.href = 'Login.html';
+    }
+
+    function loadProfile() {
+      const email = localStorage.getItem('userEmail') || '—';
+      const name  = localStorage.getItem('userName')  || email;
+      const dept  = localStorage.getItem('userDept')  || '—';
+      document.getElementById('facultyEmail').textContent   = email;
+      document.getElementById('facultyName').textContent    = name;
+      document.getElementById('facultyDept').textContent    = dept;
+      document.getElementById('facultyMeta').textContent    = 'Faculty · ' + dept + ' · SocialStack';
+      document.getElementById('avatarInitials').textContent = name.substring(0,2).toUpperCase();
+    }
+
+    function selectRole(role) {
+      document.getElementById('selectedRole').value = role;
+      document.getElementById('btnHead').className  = role === 'HEAD'        ? 'role-btn selected-head'  : 'role-btn';
+      document.getElementById('btnCoord').className = role === 'COORDINATOR' ? 'role-btn selected-coord' : 'role-btn';
+    }
+
+    function updateCounters(facultyEvents) {
+      const total  = facultyEvents.length;
+      const heads  = facultyEvents.filter(e => e.facultyRole === 'HEAD').length;
+      const coords = facultyEvents.filter(e => e.facultyRole === 'COORDINATOR').length;
+
+      const el = document.getElementById('statTotalEvents');
+      el.textContent = total; el.classList.add('bump');
+      setTimeout(() => el.classList.remove('bump'), 300);
+
+      document.getElementById('statAsHead').textContent  = heads;
+      document.getElementById('statAsCoord').textContent = coords;
+      document.getElementById('cardTotalEvents').textContent = total;
+      document.getElementById('cardAsHead').textContent      = heads;
+      document.getElementById('cardAsCoord').textContent     = coords;
+      document.getElementById('headCount').textContent  = '(' + heads  + ')';
+      document.getElementById('coordCount').textContent = '(' + coords + ')';
+      document.getElementById('allEventsCount').textContent = '(' + total + ')';
+      document.getElementById('headCountFull').textContent  = '(' + heads + ')';
+      document.getElementById('coordCountFull').textContent = '(' + coords + ')';
+
+      const headEvents  = facultyEvents.filter(e => e.facultyRole === 'HEAD');
+      const coordEvents = facultyEvents.filter(e => e.facultyRole === 'COORDINATOR');
+
+      const headHtml = headEvents.length > 0
+        ? headEvents.map(e => eventItemHtml(e, '#f59e0b', 'badge-orange', '👑 Head')).join('')
+        : `<div class="empty-state"><div class="empty-icon">👑</div><p>No Head events yet.</p></div>`;
+
+      const coordHtml = coordEvents.length > 0
+        ? coordEvents.map(e => eventItemHtml(e, '#4f46e5', 'badge-blue', '🤝 Coordinator')).join('')
+        : `<div class="empty-state"><div class="empty-icon">🤝</div><p>No Coordinator events yet.</p></div>`;
+
+      document.getElementById('headEventsList').innerHTML  = headHtml;
+      document.getElementById('headEventsListFull').innerHTML  = headHtml;
+      document.getElementById('coordEventsList').innerHTML = coordHtml;
+      document.getElementById('coordEventsListFull').innerHTML = coordHtml;
+
+      document.getElementById('allEventsContainer').innerHTML = total > 0
+        ? `<table><thead><tr><th>Event Name</th><th>Date</th><th>Category</th><th>Location</th><th>My Role</th></tr></thead>
+            <tbody>${facultyEvents.map(e => {
+              const isHead = e.facultyRole === 'HEAD';
+              return `<tr>
+                <td><strong>${e.eventName || '-'}</strong></td>
+                <td>${e.eventDate != null && e.eventDate !== '' ? e.eventDate : '-'}</td><td>${e.category || '-'}</td><td>${e.location || '-'}</td>
+                <td>${isHead
+                  ? '<span class="event-badge badge-orange">👑 Head</span>'
+                  : '<span class="event-badge badge-blue">🤝 Coordinator</span>'}</td>
+              </tr>`;
+            }).join('')}</tbody></table>`
+        : `<div class="empty-state"><div class="empty-icon">📭</div><p>No events assigned yet.</p></div>`;
+    }
+
+    /** Build subtitle line from API fields (date, time, category, location). */
+    function formatFacultyEventMeta(e) {
+      const parts = [];
+      if (e.eventDate != null && e.eventDate !== '') parts.push(String(e.eventDate));
+      if (e.eventTime != null && e.eventTime !== '') parts.push(String(e.eventTime));
+      if (e.category) parts.push(e.category);
+      if (e.location) parts.push(e.location);
+      return parts.length ? parts.join(' · ') : 'Add date & details in event record';
+    }
+
+    function eventItemHtml(e, dotColor, badgeClass, label) {
+      const meta = formatFacultyEventMeta(e);
+      return `<div class="event-item">
+        <div class="event-dot" style="background:${dotColor}"></div>
+        <div class="event-info">
+          <h4>${e.eventName || '-'}</h4>
+          <p>${meta}</p>
+        </div>
+        <span class="event-badge ${badgeClass}">${label}</span>
+      </div>`;
+    }
+
+    async function loadFacultyEvents() {
+      if (!userId) return [];
+      try {
+        const res    = await fetch(`${API}/faculty-events/faculty/${userId}`, { headers: authHeaders() });
+        const events = await res.json();
+        updateCounters(events);
+        return events;
+      } catch (err) { console.error('Could not load faculty events:', err); return []; }
+    }
+
+    async function loadPendingApprovals() {
+      try {
+        const res     = await fetch(`${API}/events`);
+        const events  = await res.json();
+        const pending = (events||[]).filter(e => (e.status||'').toUpperCase() === 'PENDING');
+        document.getElementById('cardPending').textContent  = pending.length;
+        document.getElementById('pendingCount').textContent = '(' + pending.length + ')';
+        document.getElementById('approvalsContainer').innerHTML = pending.length > 0
+          ? `<table><thead><tr><th>Event</th><th>Organizer</th><th>Date</th><th>Action</th></tr></thead>
+              <tbody>${pending.map(e => `
+                <tr id="row-${e.id}">
+                  <td><strong>${e.eventName||'—'}</strong></td>
+                  <td>${e.organizer||'—'}</td><td>${e.eventDate||'—'}</td>
+                  <td>
+                    <button class="btn-approve" onclick="approveEvent(${e.id})">✓ Approve</button>
+                    <button class="btn-reject"  onclick="rejectEvent(${e.id})">✗ Reject</button>
+                  </td>
+                </tr>`).join('')}</tbody></table>`
+          : `<div class="empty-state"><div class="empty-icon">📋</div><p>No pending approvals.</p></div>`;
+      } catch (err) { console.error('Could not load approvals:', err); }
+    }
+
+    /** Group participant rows by event so the UI is event-wise. */
+    function groupParticipantsByEvent(list) {
+      const map = new Map();
+      for (const p of list) {
+        const key = p.eventId != null ? String(p.eventId) : '_';
+        if (!map.has(key)) {
+          map.set(key, {
+            eventId: p.eventId,
+            eventName: p.eventName,
+            eventDate: p.eventDate,
+            eventCategory: p.eventCategory,
+            eventLocation: p.eventLocation,
+            rows: []
+          });
+        }
+        map.get(key).rows.push(p);
+      }
+      return Array.from(map.values()).sort((a, b) => {
+        const da = a.eventDate || '';
+        const db = b.eventDate || '';
+        if (da !== db) return da < db ? -1 : da > db ? 1 : 0;
+        return (a.eventName || '').localeCompare(b.eventName || '');
+      });
+    }
+
+    function roleBadgeHtml(fr) {
+      const u = (fr || '').toUpperCase();
+      if (u === 'HEAD') return '<span class="event-badge badge-orange">👑 Head</span>';
+      return '<span class="event-badge badge-blue">🤝 Coordinator</span>';
+    }
+
+    /** Dept, college ID, phone — student info for faculty view (not faculty assignment). */
+    function formatStudentDetails(p) {
+      const dept = p.studentDepartment || p.department || '';
+      const cid = p.studentCollegeId || p.collegeId || '';
+      const phone = p.studentPhone || p.phone || '';
+      const segs = [];
+      if (dept) segs.push(escapeHtml(dept));
+      if (cid) segs.push(escapeHtml('ID: ' + cid));
+      if (phone) segs.push(escapeHtml(phone));
+      return segs.length ? segs.join(' · ') : '<span style="color:#94a3b8">—</span>';
+    }
+
+    async function loadParticipants() {
+      if (!userId) return;
+      const emptyParticipants = `<div class="empty-state"><div class="empty-icon">👥</div><p>No participant data yet.</p></div>`;
+      try {
+        const res  = await fetch(`${API}/faculty-events/faculty/${userId}/participants`, { headers: authHeaders() });
+        const raw = await res.json();
+        const list = Array.isArray(raw) ? raw : [];
+        document.getElementById('cardParticipants').textContent = list.length;
+        if (list.length > 0) {
+          const groups = groupParticipantsByEvent(list);
+          document.getElementById('participantsContainer').innerHTML = groups.map(g => {
+            const title = escapeHtml(g.eventName || ('Event #' + g.eventId));
+            const meta = [g.eventDate || 'TBD', g.eventCategory || '', g.eventLocation || '']
+              .filter(Boolean).join(' · ');
+            const fr = g.rows[0] && g.rows[0].facultyRole;
+            const assignmentLine = fr
+              ? `<div style="margin-top:8px;font-size:12px;color:#475569;">Your assignment for this event: ${roleBadgeHtml(fr)}</div>`
+              : '';
+            const bodyRows = g.rows.slice().sort((a, b) =>
+              (a.studentName || '').localeCompare(b.studentName || '')
+            ).map(p => `<tr>
+                <td style="padding:10px 16px;vertical-align:top;">${escapeHtml(p.studentName || p.fullName || '—')}</td>
+                <td style="padding:10px 16px;vertical-align:top;">${escapeHtml(p.studentEmail || p.email || '—')}</td>
+                <td style="padding:10px 16px;vertical-align:top;color:#334155;font-size:13px;">${formatStudentDetails(p)}</td>
+                <td style="padding:10px 16px;vertical-align:top;"><span class="event-badge badge-green">${escapeHtml(p.registrationStatus || 'REGISTERED')}</span></td>
+              </tr>`).join('');
+            return `
+              <div class="participant-event-block" style="margin-bottom:18px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;background:#fff;">
+                <div style="background:#f1f5f9;padding:12px 16px;border-bottom:1px solid #e2e8f0;">
+                  <div style="font-weight:700;color:#1e293b;font-size:15px;">${title}</div>
+                  <div style="font-size:12px;color:#64748b;margin-top:4px;">${escapeHtml(meta)}</div>
+                  ${assignmentLine}
+                </div>
+                <table style="width:100%;border-collapse:collapse;font-size:14px;">
+                  <thead><tr style="background:#f8fafc;">
+                    <th style="text-align:left;padding:10px 16px;">Student</th>
+                    <th style="text-align:left;padding:10px 16px;">Email</th>
+                    <th style="text-align:left;padding:10px 16px;">Student details</th>
+                    <th style="text-align:left;padding:10px 16px;">Registration</th>
+                  </tr></thead>
+                  <tbody>${bodyRows}</tbody>
+                </table>
+              </div>`;
+          }).join('');
+        } else {
+          document.getElementById('participantsContainer').innerHTML = emptyParticipants;
+        }
+      } catch (err) {
+        console.error('Could not load participants:', err);
+        document.getElementById('cardParticipants').textContent = '0';
+        document.getElementById('participantsContainer').innerHTML = emptyParticipants;
+      }
+    }
+
+    function escapeHtml(s) {
+      if (s == null) return '';
+      const t = document.createElement('div');
+      t.textContent = s;
+      return t.innerHTML;
+    }
+
+    async function loadEventsDropdown() {
+      try {
+        const res    = await fetch(`${API}/events`);
+        const events = await res.json();
+        const select = document.getElementById('eventSelect');
+        select.innerHTML = events && events.length > 0
+          ? '<option value="">-- Select Event --</option>' + events.map(e => `<option value="${e.id}">${e.eventName} (${e.eventDate||'TBD'})</option>`).join('')
+          : '<option value="">-- No events available --</option>';
+      } catch (err) { console.error('Dropdown error:', err); }
+    }
+
+    async function assignRole() {
+      const eventId   = document.getElementById('eventSelect').value;
+      const facultyRole = document.getElementById('selectedRole').value;
+      const msg       = document.getElementById('assignMsg');
+      msg.className = 'msg'; msg.textContent = '';
+
+      if (!eventId) { msg.className = 'msg error'; msg.textContent = 'Please select an event.'; return; }
+      if (!userId)  { msg.className = 'msg error'; msg.textContent = 'Not logged in.'; return; }
+
+      try {
+        const res  = await fetch(`${API}/faculty-events/assign`, {
+          method: 'POST', headers: authHeaders(),
+          body: JSON.stringify({ facultyId: parseInt(userId), eventId: parseInt(eventId), facultyRole })
+        });
+        const text = await res.text();
+        if (res.ok) {
+          msg.className = 'msg success';
+          msg.textContent = '✅ Assigned as ' + facultyRole + '!';
+          showToast('Role assigned! 🎉', 'success');
+          await loadFacultyEvents();
+          await loadParticipants();
+        } else {
+          msg.className = 'msg error'; msg.textContent = text || 'Could not assign role.';
+        }
+      } catch (err) { msg.className = 'msg error'; msg.textContent = 'Server error.'; }
+    }
+
+    async function approveEvent(id) {
+      try {
+        await fetch(`${API}/events/${id}/approve`, { method: 'PUT', headers: authHeaders() });
+        document.getElementById(`row-${id}`)?.remove();
+        showToast('Event approved! ✅', 'success');
+        await loadPendingApprovals();
+        await loadFacultyEvents();
+        await loadParticipants();
+        await loadEventsDropdown();
+      } catch (err) { showToast('Could not approve.', 'error'); }
+    }
+
+    async function rejectEvent(id) {
+      try {
+        await fetch(`${API}/events/${id}/reject`, { method: 'PUT', headers: authHeaders() });
+        document.getElementById(`row-${id}`)?.remove();
+        showToast('Event rejected.', 'error');
+        await loadPendingApprovals();
+        await loadFacultyEvents();
+        await loadEventsDropdown();
+      } catch (err) { showToast('Could not reject.', 'error'); }
+    }
+
+    async function submitEvent() {
+      const msg = document.getElementById('submitMsg');
+      msg.className = 'msg'; msg.textContent = '';
+      if (!userId) {
+        msg.className = 'msg error';
+        msg.textContent = 'Please login first.';
+        return;
+      }
+
+      const data = {
+        eventName:       document.getElementById('eventName').value,
+        eventDate:       document.getElementById('eventDate').value,
+        eventTime:       document.getElementById('eventTime').value,
+        location:        document.getElementById('location').value,
+        category:        document.getElementById('category').value,
+        description:     document.getElementById('description').value,
+        organizer:       document.getElementById('organizer').value,
+        email:           document.getElementById('orgEmail').value,
+        maxParticipants: document.getElementById('maxParticipants').value
+          ? parseInt(document.getElementById('maxParticipants').value) : null,
+        submittedBy:       userId ? parseInt(userId) : null,
+        requestedFacultyId: userId ? parseInt(userId) : null,
+        requestedFacultyRole: document.getElementById('facultyRole').value
+      };
+
+      if (!data.eventName || !data.eventDate || !data.location || !data.category) {
+        msg.className = 'msg error'; msg.textContent = 'Please fill in all required fields.'; return;
+      }
+
+      try {
+        const createRes = await fetch(`${API}/events/submit`, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify(data)
+        });
+        if (!createRes.ok) {
+          const errText = await createRes.text();
+          throw new Error(errText || 'Could not create event in backend');
+        }
+
+        msg.className = 'msg success';
+        msg.textContent = '✅ Event submitted as PENDING. After approval, it will appear under Events as ' +
+          (data.requestedFacultyRole === 'COORDINATOR' ? 'Coordinator' : 'Head') + ', and students can see it once approved.';
+        showToast('Submitted for approval 🎉', 'success');
+      } catch (err) {
+        msg.className = 'msg error';
+        msg.textContent = (err && err.message) ? err.message : 'Server error. Could not submit event.';
+        showToast('Submit failed', 'error');
+      }
+
+      ['eventName','eventDate','eventTime','location','description','organizer','orgEmail','maxParticipants'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('category').value = '';
+      document.getElementById('facultyRole').value = 'HEAD';
+      await loadPendingApprovals();
+      await loadFacultyEvents();
+      await loadEventsDropdown();
+      loadFacultyCreatedEvents();
+      setTimeout(() => showView('approvals'), 1200);
+    }
+
+    // ── Load and display faculty-created events with enrolled students ──
+    function loadFacultyCreatedEvents() {
+      const localKey = 'facultyCreatedEvents';
+      const allLocal = JSON.parse(localStorage.getItem(localKey) || '[]');
+      const myEvents = allLocal.filter(e => e.createdById == userId || !e.createdById);
+      const container = document.getElementById('facultyCreatedEventsContainer');
+
+      if (!myEvents.length) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>No events created yet. Use "Create Event" to add one.</p></div>`;
+        return;
+      }
+
+      container.innerHTML = myEvents.map(ev => {
+        const enrolled = ev.enrolledStudents || [];
+        const chipsHtml = enrolled.length > 0
+          ? enrolled.map(s => `<span class="student-chip">👤 ${s.name || s.email || 'Student'}</span>`).join('')
+          : `<span class="no-enrollees">No students enrolled yet</span>`;
+        return `
+          <div class="fac-event-block">
+            <div class="fac-event-header">
+              <div>
+                <h4>${ev.eventName}</h4>
+                <span class="fac-meta">📅 ${ev.eventDate||'—'} &nbsp;·&nbsp; 📍 ${ev.location||'—'} &nbsp;·&nbsp; 🏷️ ${ev.category||'—'}</span>
+              </div>
+              <span class="joined-badge">👥 ${enrolled.length} Enrolled</span>
+            </div>
+            <div class="enrolled-list">
+              <div style="font-size:12px;color:#64748b;margin-bottom:6px;font-weight:600;">Enrolled Students:</div>
+              ${chipsHtml}
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    async function init() {
+      loadProfile();
+      await loadFacultyEvents();
+      await loadPendingApprovals();
+      await loadParticipants();
+      await loadEventsDropdown();
+      loadFacultyCreatedEvents();
+    }
+
+    init();
+</script>
+</body>
+</html>
