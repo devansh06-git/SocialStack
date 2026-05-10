@@ -92,9 +92,15 @@ Maven
 
 !\[Student Dashboard](./ScreenShort/Student Dashboard.png)
 
+<img src="./ScreenShort/Faculty%20Dashboard.png" width="600" alt="Faculty Dashboard">
+
 !\[Faculty Dashboard](./ScreenShort/Faculty Dashboard.png)
 
+<img src="./ScreenShort/Create%20Event.png" width="600" alt="Create Event">
+
 !\[Create Event](./ScreenShort/Create Event.png)
+
+<img src="./ScreenShort/Browse%20Event.png" width="600" alt="Browse Event">
 
 !\[Student Dashboard](./ScreenShort/Browse Events.png)
 
