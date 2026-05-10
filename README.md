@@ -32,15 +32,15 @@ SocialStack is a full-stack platform designed to bridge the gap between campus e
 
 &#x20;Key Features
 
-\* \*\*Role-Based Access Control (RBAC):\*\* Secure login for Admins, Faculty, and Students.
+Role-Based Access Control (RBAC):\*\* Secure login for Admins, Faculty, and Students.
 
-\* \*\*Event Lifecycle:\*\* Faculty can propose events, and Admins can approve/reject them.
+Event Lifecycle:\*\* Faculty can propose events, and Admins can approve/reject them.
 
-\* \*\*Student Registration:\*\* Easy one-click registration for upcoming campus activities.
+Student Registration:\*\* Easy one-click registration for upcoming campus activities.
 
-\* \*\*Resource Management:\*\* Automated tracking of venues, times, and organizers.
+Resource Management:\*\* Automated tracking of venues, times, and organizers.
 
-\* \*\*Analytics Dashboard:\*\* Visual insights into event attendance and engagement.
+Analytics Dashboard:\*\* Visual insights into event attendance and engagement.
 
 
 
