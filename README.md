@@ -1,18 +1,18 @@
-\# SocialStack 
+&#x20;SocialStack 
 
-\### A Comprehensive Campus Event Management System
-
-
-
-\*\*SocialStack\*\* is a full-stack platform designed to bridge the gap between campus event organizers and students. Built with a robust Java backend, it handles everything from event approval workflows to real-time participant tracking.
+&#x20;A Comprehensive Campus Event Management System
 
 
 
-\---
+SocialStack is a full-stack platform designed to bridge the gap between campus event organizers and students. Built with a robust Java backend, it handles everything from event approval workflows to real-time participant tracking.
 
 
 
-\##  Tech Stack
+
+
+
+
+&#x20; Tech Stack
 
 \* \*\*Backend:\*\* Java 17+, Spring Boot
 
@@ -26,11 +26,11 @@
 
 
 
-\---
 
 
 
-\## Key Features
+
+&#x20;Key Features
 
 \* \*\*Role-Based Access Control (RBAC):\*\* Secure login for Admins, Faculty, and Students.
 
@@ -44,11 +44,11 @@
 
 
 
-\---
 
 
 
-\##  Architecture
+
+&#x20; Architecture
 
 The project follows a \*\*Layered Architecture\*\* to ensure scalability and clean code:
 
@@ -70,7 +70,7 @@ The project follows a \*\*Layered Architecture\*\* to ensure scalability and cle
 
 
 
-\### Prerequisites
+&#x20;Prerequisites
 
 \* JDK 17 or higher
 
@@ -80,7 +80,7 @@ The project follows a \*\*Layered Architecture\*\* to ensure scalability and cle
 
 
 
-\### Installation
+&#x20;Installation
 
 1\. Clone the repository:
 
