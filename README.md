@@ -1,4 +1,4 @@
-&#x20;SocialStack 
+&#x20;SocialStack
 
 &#x20;A Comprehensive Campus Event Management System
 
@@ -72,11 +72,11 @@ The project follows a \*\*Layered Architecture\*\* to ensure scalability and cle
 
 &#x20;Prerequisites
 
- JDK 17 or higher
+JDK 17 or higher
 
 MySQL Server
 
- Maven
+Maven
 
 
 
@@ -88,13 +88,13 @@ MySQL Server
 
 &#x20;  git clone \[https://github.com/devansh06-git/SocialStack.git](https://github.com/devansh06-git/SocialStack.git)
 
+<img src="./ScreenShort/Student%20Dashboard.png" width="600" alt="Student Dashboard">
 
+!\[Student Dashboard](./ScreenShort/Student Dashboard.png)
 
-!\[Student Dashboard]("ScreenShort\\Student Dashboard.png")
+!\[Faculty Dashboard](./ScreenShort/Faculty Dashboard.png)
 
-!\[Faculty Dashboard]("ScreenShort\\Faculty Dashboard.png")
+!\[Create Event](./ScreenShort/Create Event.png)
 
-!\[Create Event]("ScreenShort\\Create Event.png")
-
-!\[Student Dashboard]("ScreenShort\\Browse Events.png")
+!\[Student Dashboard](./ScreenShort/Browse Events.png)
 
